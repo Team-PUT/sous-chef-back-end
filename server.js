@@ -36,8 +36,9 @@ app.get('/', (req, res) => {
   res.send('Server is working!');
 });
 
-app.post('/searchIngredients', handlers.searchForRecipes);
-
+app.get('/searchIngredients', handlers.searchForRecipes);
 
 
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));
+
+

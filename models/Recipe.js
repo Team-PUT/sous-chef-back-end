@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const recipeScehma = new mongoose.Schema({
   name: String,
   link: String,
+  image: String,
   source: String,
-  ingredients: Array,
-  email: String
+  ingredients: Array
 });
 
 const Recipe = mongoose.model('Recipe', recipeScehma);
