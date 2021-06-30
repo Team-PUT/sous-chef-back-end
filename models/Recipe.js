@@ -5,7 +5,8 @@ const recipeScehma = new mongoose.Schema({
   link: String,
   image: String,
   source: String,
-  ingredients: Array
+  ingredients: Array,
+  email: String
 });
 
 const Recipe = mongoose.model('Recipe', recipeScehma);

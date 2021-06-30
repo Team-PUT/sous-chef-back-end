@@ -38,6 +38,10 @@ app.get('/', (req, res) => {
 
 app.get('/searchIngredients', handlers.searchForRecipes);
 
+app.get('/profileRecipes', handlers.generateProfileRecipes);
+
+app.put('/update', handlers.assignRecipe);
+
 
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));
 
