@@ -32,21 +32,20 @@ let handleLogin = (req, res) => {
 };
 
 let createRecipes = (data) => {
-
-  let recipeArr = [];
-
-  for (let i = 0; i < 20; i++) {
-    const newRecipe = new Recipe({
-      name: data[i].recipe.label,
-      link: data[i].recipe.url,
-      image: data[i].recipe.image,
-      source: data[i].recipe.source,
-      ingredients: data[i].recipe.ingredientLines,
-      email: ''
+  return data.map(outerArr => {
+    return outerArr.map(recipe => {
+      let newRecipe = new Recipe({
+        name: recipe.recipe.label,
+        link: recipe.recipe.url,
+        image: recipe.recipe.image,
+        source: recipe.recipe.source,
+        ingredients: recipe.recipe.ingredientLines,
+        matches: 0,
+        email: ''
+      });
+      return newRecipe;
     });
-    recipeArr.push(newRecipe);
-  }
-  return recipeArr;
+  });
 };
 
 let searchForRecipes = async(req, res) => {
@@ -63,9 +62,29 @@ let searchForRecipes = async(req, res) => {
     return axios.get(`https://api.edamam.com/api/recipes/v2?type=public&q=${ingredient}&app_id=${process.env.EDEMAM_ID}&app_key=${process.env.EDEMAM_KEY}`);
   }));
 
+  let rawRecipeArr = arrOfResponses.map(x => x.data.hits.slice(0, 12));
 
-  res.send(arrOfResponses.map(x => x.data.hits.slice));
+  let refinedRecipeArr = createRecipes(rawRecipeArr);
+
+  let finalRecipeArr = [];
+
+  refinedRecipeArr.forEach(outerArr => {
+    outerArr.forEach(recipe => {
+      finalRecipeArr.push(recipe);
+    });
+  });
+
+  finalRecipeArr.forEach(recipe => {
+    for (let i = 0; i < ingrArr.length; i++) {
+      console.log(ingrArr[i]);
+      recipe.ingredients.includes(ingrArr[i]) ? recipe.matches += 1 : recipe.matches;
+    }
+    recipe.save();
+  });
+
+  res.send(finalRecipeArr);
 };
+
 
 let generateProfileRecipes = async(req, res) => {
   const token = req.headers.authorization.split (' ')[1];

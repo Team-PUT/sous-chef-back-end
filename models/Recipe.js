@@ -6,6 +6,7 @@ const recipeScehma = new mongoose.Schema({
   image: String,
   source: String,
   ingredients: Array,
+  matches: Number,
   email: String
 });
 
