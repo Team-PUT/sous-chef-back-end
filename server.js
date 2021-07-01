@@ -36,7 +36,13 @@ app.get('/', (req, res) => {
   res.send('Server is working!');
 });
 
+app.get('/login', handlers.handleLogin);
+
 app.get('/searchIngredients', handlers.searchForRecipes);
+
+app.get('/profileRecipes', handlers.generateProfileRecipes);
+
+app.put('/update', handlers.assignRecipe);
 
 
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));

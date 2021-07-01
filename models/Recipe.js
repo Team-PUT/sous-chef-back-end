@@ -5,7 +5,10 @@ const recipeScehma = new mongoose.Schema({
   link: String,
   image: String,
   source: String,
-  ingredients: Array
+  ingredients: Array,
+  matches: Number,
+  matchArray: Array,
+  email: String
 });
 
 const Recipe = mongoose.model('Recipe', recipeScehma);
