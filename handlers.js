@@ -41,6 +41,7 @@ let createRecipes = (data) => {
         source: recipe.recipe.source,
         ingredients: recipe.recipe.ingredientLines,
         matches: 0,
+        matchArray: [],
         email: ''
       });
       return newRecipe;
@@ -76,11 +77,18 @@ let searchForRecipes = async(req, res) => {
 
   finalRecipeArr.forEach(recipe => {
     for (let i = 0; i < ingrArr.length; i++) {
-      console.log(ingrArr[i]);
-      recipe.ingredients.includes(ingrArr[i]) ? recipe.matches += 1 : recipe.matches;
+      recipe.ingredients.forEach(ingredient => {
+        let lowerCase = ingredient.toLowerCase();
+        if (lowerCase.includes(ingrArr[i].toLowerCase())) {
+          recipe.matchArray.push(ingrArr[i]);
+          recipe.matches += 1;
+        }
+      });
     }
     recipe.save();
   });
+
+  finalRecipeArr.sort((recipeA, recipeB) => recipeB.matches - recipeA.matches);
 
   res.send(finalRecipeArr);
 };
