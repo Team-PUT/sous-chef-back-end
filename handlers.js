@@ -1,5 +1,4 @@
 const axios = require('axios');
-const mongoose = require('mongoose');
 
 //Authoriztion from AuthO website.
 const jwt = require('jsonwebtoken');
@@ -19,7 +18,18 @@ function getKey (header, callback) {
 
 const Recipe = require('./models/Recipe');
 
-
+let handleLogin = (req, res) => {
+  // grab the token that was sent by the frontend
+  const token = req.headers.authorization.split (' ')[1];
+  // make sure the token is valid
+  jwt.verify (token, getKey, {}, function (err, user) {
+    if (err) {
+      res.status (500).send ('invalid token');
+    } else {
+      res.send (user);
+    }
+  });
+};
 
 let createRecipes = (data) => {
 
@@ -31,7 +41,8 @@ let createRecipes = (data) => {
       link: data[i].recipe.url,
       image: data[i].recipe.image,
       source: data[i].recipe.source,
-      ingredients: data[i].recipe.ingredientLines
+      ingredients: data[i].recipe.ingredientLines,
+      email: ''
     });
     recipeArr.push(newRecipe);
   }
@@ -41,11 +52,19 @@ let createRecipes = (data) => {
 let searchForRecipes = async(req, res) => {
   console.log('route is working');
 
-  let ingredients = req.query.ingredients;
-  let response = await axios.get(`https://api.edamam.com/api/recipes/v2?type=public&q=${ingredients}&app_id=${process.env.EDEMAM_ID}&app_key=${process.env.EDEMAM_KEY}`);
-  let recipeArr = createRecipes(response.data.hits);
+  //receive an array of strings back, make one API call per string. Store the response with createRecipes and add it to an array.
+  //Check how many ingredients in RecipeArr[i].ingredients matches your string list of ingredients, tally the total and send the data back from high to low (sort the array of recipes)
 
-  res.send(recipeArr);
+  let ingredients = req.query.ingredients;
+
+  let ingrArr = JSON.parse(ingredients);
+
+  let arrOfResponses = await Promise.all(ingrArr.map(ingredient => {
+    return axios.get(`https://api.edamam.com/api/recipes/v2?type=public&q=${ingredient}&app_id=${process.env.EDEMAM_ID}&app_key=${process.env.EDEMAM_KEY}`);
+  }));
+
+
+  res.send(arrOfResponses.map(x => x.data.hits.slice));
 };
 
 let generateProfileRecipes = async(req, res) => {
@@ -84,5 +103,5 @@ let assignRecipe = async(req, res) => {
   });
 };
 
-module.exports = {searchForRecipes, generateProfileRecipes, assignRecipe};
+module.exports = {searchForRecipes, generateProfileRecipes, assignRecipe, handleLogin};
 

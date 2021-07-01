@@ -36,6 +36,8 @@ app.get('/', (req, res) => {
   res.send('Server is working!');
 });
 
+app.get('/login', handlers.handleLogin);
+
 app.get('/searchIngredients', handlers.searchForRecipes);
 
 app.get('/profileRecipes', handlers.generateProfileRecipes);
