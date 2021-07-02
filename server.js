@@ -42,7 +42,9 @@ app.get('/searchIngredients', handlers.searchForRecipes);
 
 app.get('/profileRecipes', handlers.generateProfileRecipes);
 
-app.put('/update', handlers.assignRecipe);
+app.put('/update/:id', handlers.assignRecipe);
+
+app.delete('/delete/:id', handlers.deleteRecipe);
 
 
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));
