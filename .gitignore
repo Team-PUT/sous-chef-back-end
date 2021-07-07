@@ -1,3 +1,5 @@
+# you really needed a .gitignore
+
 .env
 
 node_modules/

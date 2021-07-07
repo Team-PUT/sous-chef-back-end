@@ -63,24 +63,36 @@ let searchForRecipes = async(req, res) => {
 
   let rawRecipeArr = arrOfResponses.map(x => x.data.hits.slice(0, 15));
   let refinedRecipeArr = createRecipes(rawRecipeArr);
-  let finalRecipeArr = [];
+  // there's a JS method for this, .flat!
+  let finalRecipeArr = refinedRecipeArr.flat();
+  // let finalRecipeArr = [];
 
-  refinedRecipeArr.forEach(outerArr => {
-    outerArr.forEach(recipe => {
-      finalRecipeArr.push(recipe);
-    });
-  });
+  // refinedRecipeArr.forEach(outerArr => {
+  //   outerArr.forEach(recipe => {
+  //     finalRecipeArr.push(recipe);
+  //   });
+  // });
 
+  // congrats on your O(n^3) algorithm :P
+  // in all seriousness, though, this is a reasonable way of calculating this.
   finalRecipeArr.forEach(recipe => {
     for (let i = 0; i < ingrArr.length; i++) {
       recipe.ingredients.forEach(ingredient => {
         let lowerCase = ingredient.toLowerCase();
         if (lowerCase.includes(ingrArr[i].toLowerCase())) {
-          recipe.matchArray.push(ingrArr[i]);
           recipe.matches += 1;
+          // do the de-duping on the backend
+          if (!recipe.matchArray.includes(ingrArr[i])) {
+            recipe.matchArray.push(ingrArr[i]);
+          }
         }
       });
     }
+    // Since you're saving all recipes found, your database size is going to grow much faster than it needs to,
+    // full of recipes that will never be seen again. To make it work with this model, you'd need to have a job
+    // set up to periodically go through the database and delete old entries without an associated email.
+    // Or, the other way to implement this would be to not save to the database at all until the user hits the
+    // save button on the frontend, and send a whole POST request with all the data.
     recipe.save();
   });
 
@@ -108,7 +120,8 @@ let generateProfileRecipes = async(req, res) => {
 };
 
 let assignRecipe = async(req, res) => {
-  const token = req.body.headers.Authorization.split (' ')[1];
+  // this is using a slightly different way of accessing the headers than all the others... why?
+  const token = req.headers.authorization.split (' ')[1];
   //make sure token was valid
   jwt.verify (token, getKey, {}, function (err, user) {
     if (err) {
@@ -118,6 +131,9 @@ let assignRecipe = async(req, res) => {
       Recipe.findOne({
         _id: req.params.id,
       }).then(foundRecipe => {
+        // this means that I can "steal" your recipe to my account if I guess its id.
+        // you should probably also make sure that the email address associated with the recipe is null
+        // before doing this assignment.
         foundRecipe.email = user.email;
         //send saved Recipe to client
         foundRecipe.save().then(savedRecipe => res.send(savedRecipe));
@@ -137,6 +153,7 @@ let deleteRecipe = async(req, res) => {
       Recipe.deleteOne ({
         _id: RecipeId,
         email: user.email,
+        // lol bookData
       }).then (deletedBookData => {
         console.log (deletedBookData);
         res.send ('Your Recipe Was Unsaved.');
