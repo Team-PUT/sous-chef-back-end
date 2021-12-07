@@ -29,6 +29,7 @@ db.once ('open', function () {
 });
 
 // ----------------------------------
+// Allows someone to search for a specific function within the handlers folder. This function is then called based on the action performed below.
 let handlers = require('./handlers');
 
 // Port pathways (docks) to front end.
